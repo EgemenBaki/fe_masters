@@ -1,0 +1,150 @@
+//* Dynamic scoping
+var teacher = 'egemen';
+function ask(question) {
+  console.log(teacher, question)
+}
+function otherClass() {
+  var teacher = 'alya';
+  ask ('why?'); // 'egemen' 'why?'
+}
+otherClass(); // expected: alya why?
+//* Dynamic scoping
+
+
+//* this: implicit binding
+var workshop = {
+  teacher: 'Kyle',
+  ask(question) {
+    console.log(this.teacher, question);
+  },
+}
+ask('selam'); // 'egemen' 'selam'
+workshop.ask('selam') // 'Kyle' 'selam'
+//* this: implicit binding
+
+
+// this: dynamic binding => sharing
+function ask(question) {
+  console.log(this.teacher, question);
+}
+var workshop1 = {
+  teacher: 'Kyle',
+  ask: ask
+}
+var workshop2 = {
+  teacher: 'Egemen',
+  ask: ask
+}
+workshop1.ask('How do I share a method?'); // 'Kyle' 'How do I share a method?'
+workshop2.ask('How do I share a method?'); // 'Egemen' 'How do I share a method?'
+// this: dynamic binding => sharing
+
+
+// this: explicit binding
+function ask(question) {
+  console.log(this.teacher, question);
+}
+var workshop1 = {
+ teacher: 'Ahmet', 
+}
+var workshop2 = {
+  teacher: 'Mehmet'
+}
+ask.call(workshop1, 'can I get an A?'); // 'Ahmet' 'can I get an A?'
+ask.call(workshop2, 'can I get an A?');// 'Mehmet' 'can I get an A?'
+// this: explicit binding
+
+
+// this: hard binding
+var workshop2 = {
+  teacher2: "Kyle",
+  ask2(question) {
+    console.log(this.teacher2, question);
+  }
+}
+setTimeout(workshop2.ask2, 10, 'Lost this?'); // undefined 'Lost this?'
+setTimeout(workshop2.ask2.bind(workshop2), 10, 'Hard bound this?'); // 'Kyle' 'Hard bound this?'this?'
+// this: hard 
+
+
+// this: new binding
+function ask3(question) {
+  console.log(this.teacher3, question);
+}
+var newEmptyObject = new ask("What is 'new' doing here?"); // undefined "What is 'new' doing here?"
+// this: new binding
+
+// this: default binding
+var teacher4 = 'Kemal';
+function ask4(question) {
+  console.log(this.teacher4, question); // this one uses the global context
+}
+function askAgain(question) {
+  "use strict";
+  console.log(this.teacher4, question);
+}
+ask4('Whats the non-strict-mode default?') // 'Kemal' 'Whats the non-strict-mode default?'
+askAgain('Whats the strict-mode default?') // TypeError
+  //* In strict mode, when you invoke a func with no other 'this' bindings, the default behavior is to leave 'this' as undefined!
+// this: default binding
+
+
+// this: binding rule precedence?
+var workshop5 = {
+  teacher5: 'Kyle',
+  ask5: function ask5(question) {
+    console.log(this.teacher5, question);
+  }
+}
+new (workshop5.ask5.bind(workshop5))('What does this do?');
+// this: binding rule precedence?
+
+// this: arrow functions
+var workshop6 = {
+  teacher6: 'Martin',
+  ask6(question) {
+    setTimeout(() => {
+      console.log(this.teacher6, question);
+    }, 100);
+  }
+}
+workshop6.ask6("Is this lexical 'this'?"); // 'Martin' "Is this lexical 'this'?"
+
+var workshop = {
+  teacher: "Egemen",
+  ask: (question) => {
+    console.log(this.teacher, question);
+  }
+}
+
+workshop.ask("What happened to 'this'?"); // undefined "What happened to 'this'?"
+workshop.ask.call(workshop, "Still no 'this'?") // undefined "Still no 'this'?"
+// this: arrow functions
+
+/* Notes
+There are FOUR ways to call a function.
+
+workshop.ask means => invoke 'ask' with the 'this' keyword pointing at 'workshop'
+  workshop.ask = ask.call(workshop, question) roughly
+hard binding: a variation of explicit binding
+
+calling a function with the 'new' keyword is equal to calling it with an empty object as the context.
+  new ask() = ask.call({})
+Steps of the 'new':
+  1. Create a brand new empty object
+  2.* Link that object to another object
+  3. Call function with its 'this' keyword set to the new object
+  4. If func does not return an object, assume return of 'this'
+  
+How to determine what the 'this' keyword is in a function:
+  1. Is the function called by 'new'?
+    Then, 'this' = newly created object
+  2. Is the func called by 'call()' or 'apply()'
+    Note: 'bind()' effectively uses 'apply()'
+    If so, the context object that is specified will be the 'this'
+  3. Is the func called on a context object?
+  4. DEFAULT: global object => except strict mode of course.
+  
+  An arrow function is this-bound (aka .bind()) to its parent function.
+*/
+

@@ -1,0 +1,57 @@
+// ES6 class : super (relative polymorphism)
+class Workshop {
+  constructor(teacher) {
+    this.teacher = teacher;
+  }
+  ask(question) {
+    console.log(this.teacher, question);
+  }
+}
+
+class AnotherWorkshop extends Workshop {
+  ask(msg) {
+    super.ask(msg.toUpperCase());
+  }
+}
+
+var deepJS = new Workshop('Kyle');
+var reactJS = new Workshop('Suzie');
+
+var JSRecentParts = new AnotherWorkshop('Egemen');
+
+deepJS.ask("Is 'class' a class?"); // 'Kyle' "Is 'class' a class?"
+reactJS.ask("Is this class OK?"); // 'Suzie' 'Is this class OK?'
+JSRecentParts.ask('are classes super?'); // 'Egemen' 'ARE CLASSES SUPER?'
+// ES6 class : super (relative polymorphism)
+
+
+// ES6 class : still dynamic 'this'
+class Workshop {
+  constructor(teacher) {
+    this.teacher = teacher;
+  }
+  ask(question) {
+    console.log(this.teacher, question);
+  }
+}
+
+var deepJS = new Workshop('Egemen');
+
+setTimeout(deepJS.ask, 100, "Still losing 'this?'"); // undefined "Still losing 'this?'"
+// ES6 class : still dynamic 'this'
+
+
+// ES6 class : fixing 'this'
+class Workshop {
+  constructor(teacher) {
+    this.teacher = teacher;
+    this.ask = question => {
+      console.log(this.teacher, question);
+    }
+  }
+}
+
+var deepJS = new Workshop('Kyle');
+setTimeout(deepJS.ask, 100, "Is 'this' fixed?"); // 'Kyle' "Is 'this' fixed?"
+deepJS.ask("Still fixed?"); // 'Kyle' 'Still fixed?'
+// ES6 class : fixing 'this'
