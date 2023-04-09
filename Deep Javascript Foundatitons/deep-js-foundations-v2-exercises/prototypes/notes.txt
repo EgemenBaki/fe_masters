@@ -1,0 +1,109 @@
+Prototypes
+
+    When you use 'new' keyword when defining an object -> it's constructing an object to be used for 'this' binding of that function call.
+
+    Object -> Prototype
+        Object.prototype = The property pointing from the Object function over to Prototype.
+     * All non-primitives descend directly from Object.prototype.
+     As can be seen in line 23: Object.prototype.constructor just points back from prototype to the object.
+
+    Steps when the keyword 'new' is used:
+        1. Creates a new object.
+        2. Links that new object to another object.
+        3. It invokes the function that it was called in front of.
+            -> It invokes that with the 'this' keyword pointing at the object.
+        4. Returns the newly created object.
+    * That internal link that is created on the step 2: Prototype chain
+    * In case of higher-order functions (.map(), .filter() etc): How an ho function calls the function entirely determines what the 'this' context will be.
+    
+    Object.create => equal to the first 2 steps of the 'new' keyword.
+      1. Creates a new object.
+      2. Links that object to another object.
+    * You can not make real 'inheritance' through linking prototypes. You can simply 'link' the prototypes of the objects, hence creating a so called inheritance.
+
+// Prototypal class
+function Workshop(teacher) {
+  this.teacher = teacher;
+}
+Workshop.prototype.ask = function(question) {
+  console.log(this.teacher, question);
+}
+var deepJS = new Workshop('Kyle');
+deepJS.ask('Hello'); // 'Kyle' 'Hello'
+
+console.log(Workshop); // ƒ Workshop()
+console.log(Workshop.prototype); // { ask: ƒ () }
+console.log(Workshop.prototype.constructor); // ƒ Workshop()
+
+deepJS.constructor === Workshop; // true
+deepJS.__proto__ === Workshop.prototype; // true
+deepJS.prototype // undefined
+Object.getPrototypeOf(deepJS) === Workshop.prototype; // true
+
+// Prototypal class
+
+
+// Prototypes: shadowing  
+deepJS.ask = function(question) {
+  this.ask(question.toUpperCase());
+}
+
+deepJS.ask('which one is gonna work?') // RangeError: Maximum call stack size exceeded
+// The reason is, in line 44 the 'this' context points to the deepJS object, because of the call site of line 47. So, in line 44, this.ask will point at this.ask, and thus create an infinite recursion.
+// If I call it like:
+deepJS.ask = function(question) {
+  this.__proto__.ask.call(this, question.toUpperCase());
+}
+
+deepJS.ask('which one is gonna work?') // 'Kyle' 'WHICH ONE IS GONNA WORK?'
+// Prototypes: shadowing
+
+
+// Prototypal inheritance
+function Workshop(teacher) {
+  this.teacher = teacher;
+}
+
+Workshop.prototype.ask = function(question) {
+  console.log(this.teacher, question);
+}
+
+function AnotherWorkshop(teacher) {
+  Workshop.call(this, teacher);
+}
+AnotherWorkshop.prototype = Object.create(Workshop.prototype); // This replicates the standart inheritance.
+AnotherWorkshop.prototype.speakUp = function(msg) {
+  this.ask(msg.toUpperCase());
+}
+  
+var JSRecentParts = new AnotherWorkshop('Kyle');
+
+JSRecentParts.speakUp('is this working?'); // 'Kyle' 'IS THIS WORKING?'
+// Prototypal inheritance
+
+
+//OLOO - Delegated Objects
+var Workshop = {
+  setTeacher(teacher) {
+    this.teacher = teacher;
+  },
+  ask(question) {
+    console.log(this.teacher, question)
+  }
+}
+
+var AnotherWorkshop = Object.assign(
+  Object.create(Workshop),
+  {
+    speakUp(msg) {
+      this.ask(msg.toUpperCase());
+    }
+  }
+)
+
+var JSRecentParts = Object.create(AnotherWorkshop);
+JSRecentParts.setTeacher('Egemen');
+JSRecentParts.speakUp("isn't this much cleaner?"); // 'Egemen' "ISN'T THIS MUCH CLEANER?"
+JSRecentParts.teacher // 'Egemen'
+//OLOO - Delegated Objects
+
